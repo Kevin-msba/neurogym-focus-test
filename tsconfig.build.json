@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+  "exclude": ["**/*.test.ts", "**/*.test.tsx", "**/*.property.test.ts", "**/*.property.test.tsx"]
+}
