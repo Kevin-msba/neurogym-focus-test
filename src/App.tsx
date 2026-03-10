@@ -63,6 +63,15 @@ function App() {
 
   return (
     <>
+      {/* Logo - Fixed in top right corner */}
+      <div className="fixed top-4 right-4 z-50">
+        <img 
+          src="/logo.png" 
+          alt="NeuroGym Logo" 
+          className="h-12 w-auto sm:h-16"
+        />
+      </div>
+
       {state.currentScreen === 'landing' && (
         <div className="screen-transition">
           <LandingPage onStartTest={handleStartTest} />

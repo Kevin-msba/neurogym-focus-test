@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroGym - Product Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            overflow: hidden;
+        }
+
+        /* Desktop mockup */
+        .desktop {
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* App windows */
+        .app-window {
+            position: absolute;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+
+        .app-header {
+            background: #f0f0f0;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .app-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27c93f; }
+
+        .app-content {
+            padding: 20px;
+            height: 400px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Instagram horizontal scrolling */
+        #instagramContent {
+            display: flex;
+            gap: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        #instagramContent .social-post {
+            min-width: 100%;
+            flex-shrink: 0;
+            margin-bottom: 0;
+        }
+
+        /* Chrome window */
+        #chrome {
+            width: 800px;
+            height: 500px;
+            z-index: 10;
+        }
+
+        /* Instagram Window */
+        #instagram, #wechat {
+            width: 400px;
+            height: 600px;
+            opacity: 0;
+        }
+
+        /* Ensure Instagram is on top when active */
+        #instagram.active {
+            z-index: 20;
+        }
+
+        /* NeuroGym monitoring indicator */
+        .neurogym-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .pulse-dot {
+            width: 10px;
+            height: 10px;
+            background: #27c93f;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        /* Alert notification - Small floating notification */
+        .alert-notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: white;
+            padding: 20px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            z-index: 2000;
+            opacity: 0;
+            max-width: 380px;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .alert-notification.show {
+            animation: slideInRight 0.4s ease forwards;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .alert-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .alert-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .alert-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .alert-message {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .alert-stat {
+            background: #fff3f3;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .alert-stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .alert-stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .alert-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: stretch;
+        }
+
+        .alert-buttons .btn {
+            flex: 1;
+            padding: 10px 16px;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* Progress dashboard */
+        .progress-dashboard {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+            z-index: 2000;
+            opacity: 0;
+            width: 600px;
+        }
+
+        .progress-dashboard.show {
+            animation: alertShow 0.5s ease forwards;
+        }
+
+        .dashboard-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .metric-trend {
+            font-size: 14px;
+            color: #27c93f;
+            margin-top: 4px;
+        }
+
+        .metric-trend.up::before {
+            content: "↑ ";
+        }
+
+        /* Focus Reset Training Screen */
+        .focus-training {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 60px;
+            border-radius: 20px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+            z-index: 2500;
+            opacity: 0;
+            text-align: center;
+            color: white;
+            pointer-events: none;
+        }
+
+        .focus-training.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            transition: all 0.3s ease;
+            pointer-events: all;
+        }
+
+        .training-timer {
+            font-size: 80px;
+            font-weight: bold;
+            margin: 30px 0;
+        }
+
+        .training-instruction {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 400px;
+            height: 8px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: white;
+            width: 0%;
+        }
+
+        /* Achievement Popup */
+        .achievement-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: white;
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+            z-index: 2000;
+            opacity: 0;
+            max-width: 550px;
+            text-align: center;
+        }
+
+        .achievement-popup.show {
+            animation: achievementShow 0.6s ease forwards;
+        }
+
+        @keyframes achievementShow {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.05);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .achievement-badge {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            animation: badgePulse 2s infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .achievement-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .achievement-subtitle {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Social feed mockup */
+        .social-post {
+            background: white;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .post-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #ffecd2, #fcb69f);
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        /* Overlay - lighter for small notification */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.3);
+            z-index: 1500;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .overlay.light {
+            background: rgba(0,0,0,0.1);
+        }
+
+        .overlay.dark {
+            background: rgba(0,0,0,0.7);
+            z-index: 2400;
+        }
+
+        /* Horizontal scrolling animation for Instagram */
+        .app-content.scrolling {
+            animation: horizontalScroll 1s ease-in-out infinite;
+        }
+
+        @keyframes horizontalScroll {
+            0% {
+                transform: translateX(0);
+            }
+            20% {
+                transform: translateX(0);
+            }
+            40% {
+                transform: translateX(-100%);
+            }
+            60% {
+                transform: translateX(-100%);
+            }
+            80% {
+                transform: translateX(-200%);
+            }
+            100% {
+                transform: translateX(-200%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="desktop">
+        <!-- NeuroGym Monitoring Indicator -->
+        <div class="neurogym-indicator" id="indicator">
+            <div class="pulse-dot"></div>
+            <span style="font-weight: 600; color: #333;">NeuroGym Monitoring</span>
+        </div>
+
+        <!-- Chrome Window -->
+        <div class="app-window" id="chrome">
+            <div class="app-header">
+                <div class="app-dot dot-red"></div>
+                <div class="app-dot dot-yellow"></div>
+                <div class="app-dot dot-green"></div>
+                <span style="margin-left: 12px; color: #666; font-size: 14px;">Work Dashboard</span>
+            </div>
+            <div class="app-content">
+                <h2 style="margin-bottom: 20px;">Project Tasks</h2>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="padding: 16px; background: #f9f9f9; border-radius: 8px;">
+                        <strong>Task 1:</strong> Complete quarterly report
+                    </div>
+                    <div style="padding: 16px; background: #f9f9f9; border-radius: 8px;">
+                        <strong>Task 2:</strong> Review team presentations
+                    </div>
+                    <div style="padding: 16px; background: #f9f9f9; border-radius: 8px;">
+                        <strong>Task 3:</strong> Prepare meeting agenda
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instagram Window -->
+        <div class="app-window" id="instagram">
+            <div class="app-header">
+                <div class="app-dot dot-red"></div>
+                <div class="app-dot dot-yellow"></div>
+                <div class="app-dot dot-green"></div>
+                <span style="margin-left: 12px; color: #666; font-size: 14px;">Instagram</span>
+            </div>
+            <div class="app-content" id="instagramContent">
+                <div class="social-post">
+                    <div class="post-header">
+                        <div class="post-avatar"></div>
+                        <strong>@travel_explorer</strong>
+                    </div>
+                    <div class="post-image"></div>
+                    <p>Amazing sunset in Bali! 🌅</p>
+                </div>
+                <div class="social-post">
+                    <div class="post-header">
+                        <div class="post-avatar"></div>
+                        <strong>@foodie_life</strong>
+                    </div>
+                    <div class="post-image"></div>
+                    <p>Best pasta in town! 🍝</p>
+                </div>
+                <div class="social-post">
+                    <div class="post-header">
+                        <div class="post-avatar"></div>
+                        <strong>@fitness_guru</strong>
+                    </div>
+                    <div class="post-image"></div>
+                    <p>Morning workout routine 💪</p>
+                </div>
+                <div class="social-post">
+                    <div class="post-header">
+                        <div class="post-avatar"></div>
+                        <strong>@tech_news</strong>
+                    </div>
+                    <div class="post-image"></div>
+                    <p>Latest gadget review 📱</p>
+                </div>
+                <div class="social-post">
+                    <div class="post-header">
+                        <div class="post-avatar"></div>
+                        <strong>@fashion_style</strong>
+                    </div>
+                    <div class="post-image"></div>
+                    <p>Summer collection 2024 ☀️</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- WeChat Window -->
+        <div class="app-window" id="wechat">
+            <div class="app-header">
+                <div class="app-dot dot-red"></div>
+                <div class="app-dot dot-yellow"></div>
+                <div class="app-dot dot-green"></div>
+                <span style="margin-left: 12px; color: #666; font-size: 14px;">WeChat</span>
+            </div>
+            <div class="app-content">
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="padding: 12px; background: #f0f0f0; border-radius: 8px;">
+                        <strong>Group Chat</strong>
+                        <p style="color: #666; font-size: 14px; margin-top: 4px;">Hey, are you free tonight?</p>
+                    </div>
+                    <div style="padding: 12px; background: #f0f0f0; border-radius: 8px;">
+                        <strong>Mom</strong>
+                        <p style="color: #666; font-size: 14px; margin-top: 4px;">Don't forget to call grandma</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Alert Notification - Small floating -->
+    <div class="alert-notification" id="alert">
+        <div class="alert-header">
+            <div class="alert-icon">⚠️</div>
+            <div class="alert-title">Focus Stability Dropping</div>
+        </div>
+        <div class="alert-message">
+            Detected rapid app switching and passive scrolling behavior.
+        </div>
+        <div class="alert-stat">
+            <div class="alert-stat-value">~18 min</div>
+            <div class="alert-stat-label">Potential attention time loss today</div>
+        </div>
+        <div class="alert-buttons">
+            <button class="btn btn-primary" onclick="startFocusReset()">
+                Focus Reset
+            </button>
+            <button class="btn btn-secondary" onclick="dismissAlert()">
+                Dismiss
+            </button>
+        </div>
+    </div>
+
+    <!-- Progress Dashboard -->
+    <div class="progress-dashboard" id="dashboard">
+        <div class="dashboard-title">Your Progress Over Time</div>
+        <div class="metric-card">
+            <div class="metric-label">Focus Stability Score</div>
+            <div class="metric-value">78 / 100</div>
+            <div class="metric-trend up">+15% from last week</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Average Recovery Time</div>
+            <div class="metric-value">45 seconds</div>
+            <div class="metric-trend up">-30% improvement</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Daily Focus Sessions</div>
+            <div class="metric-value">12 sessions</div>
+            <div class="metric-trend up">+8 from last week</div>
+        </div>
+        <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="location.reload()">
+            Restart Demo
+        </button>
+    </div>
+
+    <!-- Focus Training Screen -->
+    <div class="focus-training" id="training">
+        <div class="training-instruction">Focus Reset Exercise</div>
+        <div class="training-timer" id="timer">60</div>
+        <div style="font-size: 16px; margin-bottom: 30px;">Breathe deeply and focus on the timer</div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <!-- Achievement Popup -->
+    <div class="achievement-popup" id="achievement">
+        <div class="achievement-badge">🏆</div>
+        <div class="achievement-title">Excellent Progress!</div>
+        <div class="achievement-subtitle">After 60 seconds of focused training</div>
+        
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-number">127</div>
+                <div class="stat-label">Total Focus Sessions</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">+23%</div>
+                <div class="stat-label">Focus Improvement</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">8.5 hrs</div>
+                <div class="stat-label">Time Saved This Week</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">-35%</div>
+                <div class="stat-label">Recovery Time Reduced</div>
+            </div>
+        </div>
+
+        <div style="background: #f0f9ff; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+            <div style="font-size: 16px; color: #333; font-weight: 600; margin-bottom: 8px;">
+                Over time, you're seeing measurable improvements:
+            </div>
+            <div style="font-size: 14px; color: #666; line-height: 1.8; text-align: left;">
+                ✓ Focus stability increased by 23%<br>
+                ✓ Recovery time reduced by 35%<br>
+                ✓ Completed 127 successful focus sessions<br>
+                ✓ Saved 8.5 hours of productive time this week
+            </div>
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%;" onclick="location.reload()">
+            Share Your Progress
+        </button>
+    </div>
+
+    <script>
+        // Animation sequence
+        setTimeout(() => {
+            // Show indicator
+            document.getElementById('indicator').style.opacity = '1';
+        }, 500);
+
+        // Simulate app switching
+        setTimeout(() => {
+            const chrome = document.getElementById('chrome');
+            const instagram = document.getElementById('instagram');
+            
+            chrome.style.transform = 'translate(-300px, -100px) scale(0.9)';
+            chrome.style.opacity = '0.7';
+            
+            instagram.style.opacity = '1';
+            instagram.style.transform = 'translate(200px, 50px)';
+        }, 2000);
+
+        setTimeout(() => {
+            const instagram = document.getElementById('instagram');
+            const wechat = document.getElementById('wechat');
+            
+            instagram.style.transform = 'translate(-400px, 100px) scale(0.9)';
+            instagram.style.opacity = '0.7';
+            
+            wechat.style.opacity = '1';
+            wechat.style.transform = 'translate(150px, -50px)';
+        }, 4000);
+
+        // Switch back to Instagram and start scrolling
+        setTimeout(() => {
+            const wechat = document.getElementById('wechat');
+            const instagram = document.getElementById('instagram');
+            
+            wechat.style.transform = 'translate(400px, -100px) scale(0.9)';
+            wechat.style.opacity = '0.7';
+            
+            instagram.style.transform = 'translate(100px, 0)';
+            instagram.style.opacity = '1';
+            instagram.classList.add('active'); // Bring to front
+            
+            // Start auto-scrolling animation
+            setTimeout(() => {
+                document.getElementById('instagramContent').classList.add('scrolling');
+            }, 500);
+        }, 6000);
+
+        // Show alert after scrolling for longer (added 2 more seconds)
+        setTimeout(() => {
+            // Stop scrolling
+            document.getElementById('instagramContent').classList.remove('scrolling');
+            
+            // Show light overlay and alert
+            const overlay = document.getElementById('overlay');
+            overlay.classList.add('show', 'light');
+            document.getElementById('alert').classList.add('show');
+        }, 11000); // Changed from 9000 to 11000 (2 more seconds)
+
+        // Auto-click "Focus Reset" button after 2 seconds
+        setTimeout(() => {
+            autoStartFocusReset();
+        }, 13000); // Changed from 11000 to 13000
+
+        function dismissAlert() {
+            document.getElementById('overlay').classList.remove('show', 'light');
+            document.getElementById('alert').classList.remove('show');
+        }
+
+        function autoStartFocusReset() {
+            // Add click animation to button
+            const button = document.querySelector('.btn-primary');
+            if (button) {
+                button.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    button.style.transform = 'scale(1)';
+                }, 100);
+            }
+            
+            dismissAlert();
+            
+            // Show training screen
+            setTimeout(() => {
+                const overlay = document.getElementById('overlay');
+                const training = document.getElementById('training');
+                
+                // Show dark overlay
+                overlay.classList.remove('light');
+                overlay.classList.add('show', 'dark');
+                
+                // Show training screen
+                training.classList.add('show');
+                
+                console.log('Training screen should be visible now');
+                
+                // Reset progress bar first
+                const progressFill = document.getElementById('progressFill');
+                progressFill.style.transition = 'none';
+                progressFill.style.width = '0%';
+                
+                // Force reflow
+                void progressFill.offsetHeight;
+                
+                // Start progress bar animation
+                setTimeout(() => {
+                    progressFill.style.transition = 'width 3s linear';
+                    progressFill.style.width = '100%';
+                    console.log('Progress bar animation started');
+                }, 100);
+                
+                // Fast countdown (3 seconds total)
+                let timeLeft = 60;
+                const timerElement = document.getElementById('timer');
+                
+                const countdown = setInterval(() => {
+                    timeLeft -= 1;
+                    timerElement.textContent = timeLeft;
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(countdown);
+                        console.log('Countdown complete');
+                        
+                        // Hide training screen
+                        training.classList.remove('show');
+                        overlay.classList.remove('dark');
+                        
+                        // Show achievement popup
+                        setTimeout(() => {
+                            document.getElementById('achievement').classList.add('show');
+                        }, 500);
+                    }
+                }, 50);
+            }, 300);
+        }
+
+        function startFocusReset() {
+            autoStartFocusReset();
+        }
+    </script>
+</body>
+</html>
