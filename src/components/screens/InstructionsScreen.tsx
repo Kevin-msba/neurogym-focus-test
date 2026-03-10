@@ -9,6 +9,16 @@ export interface InstructionsScreenProps {
 export const InstructionsScreen = memo(function InstructionsScreen({ onStartGame }: InstructionsScreenProps) {
   return (
     <Container className="flex flex-col items-center justify-center min-h-screen">
+      {/* Logo */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10">
+        <img 
+          src="/neurogym-focus-test/logo.png" 
+          alt="" 
+          className="h-20 sm:h-28 w-auto"
+          style={{ fontSize: 0 }}
+        />
+      </div>
+
       <div className="max-w-2xl w-full">
         {/* Title */}
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-8 text-center">

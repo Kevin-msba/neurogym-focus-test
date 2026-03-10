@@ -9,6 +9,16 @@ export interface LandingPageProps {
 export const LandingPage = memo(function LandingPage({ onStartTest }: LandingPageProps) {
   return (
     <Container className="flex flex-col items-center justify-center min-h-screen text-center">
+      {/* Logo */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10">
+        <img 
+          src="/neurogym-focus-test/logo.png" 
+          alt="" 
+          className="h-20 sm:h-28 w-auto"
+          style={{ fontSize: 0 }}
+        />
+      </div>
+
       {/* Copyright Notice */}
       <div className="absolute top-4 left-0 right-0 text-center">
         <p className="text-xs sm:text-sm text-gray-500">

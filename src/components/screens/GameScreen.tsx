@@ -333,6 +333,16 @@ export function GameScreen({ onGameComplete }: GameScreenProps) {
       )}
 
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col items-center justify-center p-4">
+      {/* Logo */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10">
+        <img 
+          src="/neurogym-focus-test/logo.png" 
+          alt="" 
+          className="h-20 sm:h-28 w-auto"
+          style={{ fontSize: 0 }}
+        />
+      </div>
+
       {/* Rule display */}
       <div className="mb-8 text-center">
         <p className="text-sm text-gray-600 mb-2">Current Rule:</p>

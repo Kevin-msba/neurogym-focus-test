@@ -34,6 +34,16 @@ export function ReportScreen({ results, onTryAgain }: ReportScreenProps) {
 
   return (
     <Container>
+      {/* Logo */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10">
+        <img 
+          src="/neurogym-focus-test/logo.png" 
+          alt="" 
+          className="h-20 sm:h-28 w-auto"
+          style={{ fontSize: 0 }}
+        />
+      </div>
+
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Title */}
         <h1 className="text-3xl md:text-4xl font-bold text-gray-800 text-center">
